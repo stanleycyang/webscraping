@@ -61,6 +61,30 @@ app.get('/scrape', function(request, response){
 
 });
 
+app.get('/movies', function(request, response){
+  var inTheaters = 'http://www.imdb.com/movies-in-theaters/';
+  req(inTheaters, function(error, res, html){
+    if(error){
+      response.send(error);
+    }
+
+    var $ = cheerio.load(html);
+    var movies = [];
+
+    // Grab movie name
+    $('td.overview-top h4').map(function(i, el){
+       movies.push({name: $(this).text()});
+    });
+
+    $('div.metascore strong').map(function(i, el){
+      movies[i].score = $(this).text();
+    });
+
+    response.send(movies);
+
+  });
+});
+
 // Start our node web server
 var server = http.createServer(app);
 server.listen(3000);
